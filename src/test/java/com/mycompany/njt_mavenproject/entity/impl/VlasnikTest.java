@@ -44,6 +44,16 @@ class VlasnikTest {
         assertEquals("marko123", v.getUsername());
         assertEquals("lozinka", v.getLozinka());
     }
+    
+    @Test
+    void testDefaultVrednosti() {
+        assertEquals(Uloga.VLASNIK, v.getUloga());
+        assertFalse(v.isEnabled());
+        assertNotNull(v.getVozila());
+        assertTrue(v.getVozila().isEmpty());
+        assertNotNull(v.getRezervacije());
+        assertTrue(v.getRezervacije().isEmpty());
+    }
 
     @Test
     void testSetId() {

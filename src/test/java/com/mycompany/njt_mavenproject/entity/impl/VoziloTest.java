@@ -48,6 +48,12 @@ class VoziloTest {
         assertEquals("Benzin", v.getTipGoriva());
         assertEquals(vlasnik, v.getVlasnik());
     }
+    
+    @Test
+    void testDefaultRezervacije() {
+        assertNotNull(v.getRezervacije());
+        assertTrue(v.getRezervacije().isEmpty());
+    }
 
     @Test
     void testSetId() {

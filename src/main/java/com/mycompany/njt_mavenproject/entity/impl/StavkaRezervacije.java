@@ -91,7 +91,7 @@ public class StavkaRezervacije implements MyEntity {
     /**
      * Postavlja količinu usluge u stavci.
      *
-     * @param kolicina količina (minimum 1)
+     * @param kolicina količina usluge
      */
     public void setKolicina(Integer kolicina) { this.kolicina = kolicina; }
 

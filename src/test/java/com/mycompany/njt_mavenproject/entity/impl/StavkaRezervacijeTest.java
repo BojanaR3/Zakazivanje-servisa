@@ -35,6 +35,11 @@ class StavkaRezervacijeTest {
         assertEquals(r, s.getRezervacija());
         assertEquals(u, s.getUsluga());
     }
+    
+    @Test
+    void testDefaultKolicina() {
+        assertEquals(1, s.getKolicina());
+    }
 
     @Test
     void testGetUkupno() {
