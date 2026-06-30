@@ -65,6 +65,13 @@ class RezervacijaTest {
         r.prePersist();
         assertEquals(datum, r.getDatum());
     }
+    
+    @Test
+    void testPrePersistTrajanjeMinNull() {
+        r.setTrajanjeMin(null);
+        r.prePersist();
+        assertEquals(0, r.getTrajanjeMin());
+    }
 
     @Test
     void testAddItem() {
@@ -182,4 +189,15 @@ class RezervacijaTest {
         r.setTrajanjeMin(60);
         assertEquals(60, r.getTrajanjeMin());
     }
+    
+    @Test
+    void testDefaultVrednosti() {
+        assertEquals(StatusRezervacije.CREATED, r.getStatus());
+        assertEquals(0.0, r.getUkupanIznos());
+        assertEquals(0, r.getTrajanjeMin());
+        assertNotNull(r.getStavke());
+        assertTrue(r.getStavke().isEmpty());
+    }
+    
+    
 }
