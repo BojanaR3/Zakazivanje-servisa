@@ -27,27 +27,27 @@ public class Vlasnik implements MyEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /** Ime vlasnika. */
+    /** Ime vlasnika. Ne sme biti null ili prazno, maksimalno 50 karaktera. */
     @Column(nullable = false, length = 50)
     private String ime;
 
-    /** Prezime vlasnika. */
+    /** Prezime vlasnika. Ne sme biti null ili prazno, maksimalno 50 karaktera. */
     @Column(nullable = false, length = 50)
     private String prezime;
 
-    /** Email adresa vlasnika, mora biti jedinstvena. */
+    /** Email adresa vlasnika, mora biti jedinstvena. Ne sme biti null ili prazna. */
     @Column(nullable = false, length = 120)
     private String email;
 
-    /** Korisničko ime vlasnika, mora biti jedinstveno. */
+    /** Korisničko ime vlasnika, mora biti jedinstveno. Ne sme biti null ili prazno. */
     @Column(nullable = false, length = 50)
     private String username;
 
-    /** Hešovana lozinka vlasnika. */
+    /** Hešovana lozinka vlasnika. Ne sme biti null ili prazna. */
     @Column(nullable = false)
     private String lozinka;
 
-    /** Uloga korisnika u sistemu, podrazumevano VLASNIK. */
+    /** Uloga korisnika u sistemu, podrazumevano VLASNIK. Ne sme biti null. */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private Uloga uloga = Uloga.VLASNIK;
@@ -118,10 +118,18 @@ public class Vlasnik implements MyEntity {
 
     /**
      * Postavlja ime vlasnika.
+     * Ime ne sme biti null ili prazno i ne sme biti duže od 50 karaktera.
      *
      * @param ime ime vlasnika
+     * @throws IllegalArgumentException ako je ime null, prazno ili duže od 50 karaktera
      */
-    public void setIme(String ime) { this.ime = ime; }
+    public void setIme(String ime) {
+        if (ime == null || ime.isBlank())
+            throw new IllegalArgumentException("Ime ne sme biti null ili prazno.");
+        if (ime.length() > 50)
+            throw new IllegalArgumentException("Ime ne sme biti duže od 50 karaktera.");
+        this.ime = ime;
+    }
 
     /**
      * Vraća prezime vlasnika.
@@ -132,10 +140,18 @@ public class Vlasnik implements MyEntity {
 
     /**
      * Postavlja prezime vlasnika.
+     * Prezime ne sme biti null ili prazno i ne sme biti duže od 50 karaktera.
      *
      * @param prezime prezime vlasnika
+     * @throws IllegalArgumentException ako je prezime null, prazno ili duže od 50 karaktera
      */
-    public void setPrezime(String prezime) { this.prezime = prezime; }
+    public void setPrezime(String prezime) {
+        if (prezime == null || prezime.isBlank())
+            throw new IllegalArgumentException("Prezime ne sme biti null ili prazno.");
+        if (prezime.length() > 50)
+            throw new IllegalArgumentException("Prezime ne sme biti duže od 50 karaktera.");
+        this.prezime = prezime;
+    }
 
     /**
      * Vraća email adresu vlasnika.
@@ -146,10 +162,16 @@ public class Vlasnik implements MyEntity {
 
     /**
      * Postavlja email adresu vlasnika.
+     * Email ne sme biti null ili prazan.
      *
      * @param email email adresa vlasnika
+     * @throws IllegalArgumentException ako je email null ili prazan
      */
-    public void setEmail(String email) { this.email = email; }
+    public void setEmail(String email) {
+        if (email == null || email.isBlank())
+            throw new IllegalArgumentException("Email ne sme biti null ili prazan.");
+        this.email = email;
+    }
 
     /**
      * Vraća korisničko ime vlasnika.
@@ -160,10 +182,16 @@ public class Vlasnik implements MyEntity {
 
     /**
      * Postavlja korisničko ime vlasnika.
+     * Korisničko ime ne sme biti null ili prazno.
      *
      * @param username korisničko ime vlasnika
+     * @throws IllegalArgumentException ako je korisničko ime null ili prazno
      */
-    public void setUsername(String username) { this.username = username; }
+    public void setUsername(String username) {
+        if (username == null || username.isBlank())
+            throw new IllegalArgumentException("Korisničko ime ne sme biti null ili prazno.");
+        this.username = username;
+    }
 
     /**
      * Vraća hešovanu lozinku vlasnika.
@@ -174,10 +202,16 @@ public class Vlasnik implements MyEntity {
 
     /**
      * Postavlja hešovanu lozinku vlasnika.
+     * Lozinka ne sme biti null ili prazna.
      *
      * @param lozinka hešovana lozinka
+     * @throws IllegalArgumentException ako je lozinka null ili prazna
      */
-    public void setLozinka(String lozinka) { this.lozinka = lozinka; }
+    public void setLozinka(String lozinka) {
+        if (lozinka == null || lozinka.isBlank())
+            throw new IllegalArgumentException("Lozinka ne sme biti null ili prazna.");
+        this.lozinka = lozinka;
+    }
 
     /**
      * Vraća ulogu korisnika u sistemu.
@@ -188,10 +222,16 @@ public class Vlasnik implements MyEntity {
 
     /**
      * Postavlja ulogu korisnika u sistemu.
+     * Uloga ne sme biti null.
      *
      * @param uloga uloga korisnika
+     * @throws IllegalArgumentException ako je uloga null
      */
-    public void setUloga(Uloga uloga) { this.uloga = uloga; }
+    public void setUloga(Uloga uloga) {
+        if (uloga == null)
+            throw new IllegalArgumentException("Uloga ne sme biti null.");
+        this.uloga = uloga;
+    }
 
     /**
      * Proverava da li je nalog aktiviran.

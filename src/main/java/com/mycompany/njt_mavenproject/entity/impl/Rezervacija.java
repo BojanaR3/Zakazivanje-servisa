@@ -3,6 +3,7 @@ package com.mycompany.njt_mavenproject.entity.impl;
 import com.mycompany.njt_mavenproject.entity.MyEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.*;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,34 +26,34 @@ public class Rezervacija implements MyEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /** Datum i vreme rezervisanog termina. */
+    /** Datum i vreme rezervisanog termina. Ne sme biti null. */
     @Column(nullable = false)
     private LocalDateTime datum;
 
-    /** Status rezervacije (CREATED, CONFIRMED, CANCELED, COMPLETED). */
+    /** Status rezervacije (CREATED, CONFIRMED, CANCELED, COMPLETED). Ne sme biti null. */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private StatusRezervacije status = StatusRezervacije.CREATED;
 
-    /** Ukupan iznos rezervacije izračunat iz stavki. */
+    /** Ukupan iznos rezervacije izračunat iz stavki. Ne sme biti null i mora biti >= 0. */
     @Column(nullable = false)
     private Double ukupanIznos = 0.0;
 
-    /** Ukupno trajanje rezervacije u minutima, koristi se za proveru preklapanja termina. */
+    /** Ukupno trajanje rezervacije u minutima. Ne sme biti null i mora biti >= 0. */
     @Column(name = "trajanje_min", nullable = false)
     private Integer trajanjeMin = 0;
 
-    /** Vlasnik koji je kreirao rezervaciju. */
+    /** Vlasnik koji je kreirao rezervaciju. Ne sme biti null. */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "vlasnik_id", nullable = false)
     private Vlasnik vlasnik;
 
-    /** Vozilo koje se servisira u okviru rezervacije. */
+    /** Vozilo koje se servisira u okviru rezervacije. Ne sme biti null. */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "vozilo_id", nullable = false)
     private Vozilo vozilo;
 
-    /** Servis u kome je rezervisan termin. */
+    /** Servis u kome je rezervisan termin. Ne sme biti null. */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "servis_id", nullable = false)
     private Servis servis;
@@ -103,7 +104,7 @@ public class Rezervacija implements MyEntity {
      */
     @PrePersist
     public void prePersist() {
-        if (datum == null) datum = LocalDateTime.now();
+        if (datum == null) datum = LocalDateTime.now(Clock.systemDefaultZone());
         recalcTotal();
         if (trajanjeMin == null) trajanjeMin = 0;
     }
@@ -165,10 +166,16 @@ public class Rezervacija implements MyEntity {
 
     /**
      * Postavlja datum i vreme rezervacije.
+     * Datum ne sme biti null.
      *
      * @param datum datum i vreme rezervacije
+     * @throws IllegalArgumentException ako je datum null
      */
-    public void setDatum(LocalDateTime datum) { this.datum = datum; }
+    public void setDatum(LocalDateTime datum) {
+        if (datum == null)
+            throw new IllegalArgumentException("Datum rezervacije ne sme biti null.");
+        this.datum = datum;
+    }
 
     /**
      * Vraća ukupan iznos rezervacije.
@@ -179,10 +186,16 @@ public class Rezervacija implements MyEntity {
 
     /**
      * Postavlja ukupan iznos rezervacije.
+     * Iznos ne sme biti null i mora biti veći ili jednak nuli.
      *
      * @param ukupanIznos ukupan iznos
+     * @throws IllegalArgumentException ako je iznos null ili negativan
      */
-    public void setUkupanIznos(Double ukupanIznos) { this.ukupanIznos = ukupanIznos; }
+    public void setUkupanIznos(Double ukupanIznos) {
+        if (ukupanIznos == null || ukupanIznos < 0)
+            throw new IllegalArgumentException("Ukupan iznos ne sme biti null ili negativan.");
+        this.ukupanIznos = ukupanIznos;
+    }
 
     /**
      * Vraća status rezervacije.
@@ -193,10 +206,16 @@ public class Rezervacija implements MyEntity {
 
     /**
      * Postavlja status rezervacije.
+     * Status ne sme biti null.
      *
      * @param status status rezervacije
+     * @throws IllegalArgumentException ako je status null
      */
-    public void setStatus(StatusRezervacije status) { this.status = status; }
+    public void setStatus(StatusRezervacije status) {
+        if (status == null)
+            throw new IllegalArgumentException("Status rezervacije ne sme biti null.");
+        this.status = status;
+    }
 
     /**
      * Vraća vlasnika koji je kreirao rezervaciju.
@@ -207,10 +226,16 @@ public class Rezervacija implements MyEntity {
 
     /**
      * Postavlja vlasnika rezervacije.
+     * Vlasnik ne sme biti null.
      *
      * @param vlasnik vlasnik rezervacije
+     * @throws IllegalArgumentException ako je vlasnik null
      */
-    public void setVlasnik(Vlasnik vlasnik) { this.vlasnik = vlasnik; }
+    public void setVlasnik(Vlasnik vlasnik) {
+        if (vlasnik == null)
+            throw new IllegalArgumentException("Vlasnik rezervacije ne sme biti null.");
+        this.vlasnik = vlasnik;
+    }
 
     /**
      * Vraća vozilo koje se servisira.
@@ -221,10 +246,16 @@ public class Rezervacija implements MyEntity {
 
     /**
      * Postavlja vozilo koje se servisira.
+     * Vozilo ne sme biti null.
      *
      * @param vozilo vozilo rezervacije
+     * @throws IllegalArgumentException ako je vozilo null
      */
-    public void setVozilo(Vozilo vozilo) { this.vozilo = vozilo; }
+    public void setVozilo(Vozilo vozilo) {
+        if (vozilo == null)
+            throw new IllegalArgumentException("Vozilo rezervacije ne sme biti null.");
+        this.vozilo = vozilo;
+    }
 
     /**
      * Vraća servis u kome je rezervisan termin.
@@ -235,10 +266,16 @@ public class Rezervacija implements MyEntity {
 
     /**
      * Postavlja servis rezervacije.
+     * Servis ne sme biti null.
      *
      * @param servis servis u kome je termin rezervisan
+     * @throws IllegalArgumentException ako je servis null
      */
-    public void setServis(Servis servis) { this.servis = servis; }
+    public void setServis(Servis servis) {
+        if (servis == null)
+            throw new IllegalArgumentException("Servis rezervacije ne sme biti null.");
+        this.servis = servis;
+    }
 
     /**
      * Vraća listu stavki rezervacije.
@@ -263,8 +300,14 @@ public class Rezervacija implements MyEntity {
 
     /**
      * Postavlja ukupno trajanje rezervacije u minutima.
+     * Trajanje ne sme biti negativno.
      *
      * @param trajanjeMin trajanje u minutima
+     * @throws IllegalArgumentException ako je trajanje negativno
      */
-    public void setTrajanjeMin(Integer trajanjeMin) { this.trajanjeMin = trajanjeMin; }
+    public void setTrajanjeMin(Integer trajanjeMin) {
+        if (trajanjeMin != null && trajanjeMin < 0)
+            throw new IllegalArgumentException("Trajanje ne sme biti negativno.");
+        this.trajanjeMin = trajanjeMin;
+    }
 }
