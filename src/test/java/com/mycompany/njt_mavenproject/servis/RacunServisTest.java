@@ -1,11 +1,14 @@
 package com.mycompany.njt_mavenproject.servis;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.springframework.test.util.ReflectionTestUtils;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+
+import jakarta.persistence.EntityManager;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.mycompany.njt_mavenproject.dto.impl.RacunDto;
 import com.mycompany.njt_mavenproject.entity.impl.Racun;
+import com.mycompany.njt_mavenproject.entity.impl.Rezervacija;
 import com.mycompany.njt_mavenproject.mapper.impl.RacunMapper;
 import com.mycompany.njt_mavenproject.repository.impl.RacunRepository;
 
@@ -28,6 +32,9 @@ class RacunServisTest {
 
     @Mock
     RacunMapper mapper;
+
+    @Mock
+    EntityManager em;
 
     @InjectMocks
     RacunServis racunServis;
@@ -48,6 +55,7 @@ class RacunServisTest {
         racunDto.setBroj("R-001");
         racunDto.setUkupanIznos(1500.0);
         racunDto.setStatusPlacanja("NEPLACENO");
+        ReflectionTestUtils.setField(racunServis, "em", em);
     }
 
     @AfterEach
@@ -125,12 +133,55 @@ class RacunServisTest {
     }
 
     @Test
+    void testCreate() {
+        when(mapper.toEntity(racunDto)).thenReturn(racun);
+        when(mapper.toDto(racun)).thenReturn(racunDto);
+
+        RacunDto rezultat = racunServis.create(racunDto);
+
+        assertEquals(racunDto, rezultat);
+        verify(repo, times(1)).save(racun);
+    }
+
+    @Test
+    void testCreateDatumIzdavanjaNull() {
+        racun.setDatumIzdavanja(null);
+
+        when(mapper.toEntity(racunDto)).thenReturn(racun);
+        when(mapper.toDto(racun)).thenReturn(racunDto);
+
+        RacunDto rezultat = racunServis.create(racunDto);
+
+        assertEquals(racunDto, rezultat);
+        assertNotNull(racun.getDatumIzdavanja());
+        verify(repo, times(1)).save(racun);
+    }
+
+    @Test
+    void testCreateSaRezervacijaId() {
+        Rezervacija rezervacija = new Rezervacija(1L);
+        racunDto.setRezervacijaId(1L);
+
+        when(mapper.toEntity(racunDto)).thenReturn(racun);
+        when(em.getReference(Rezervacija.class, 1L)).thenReturn(rezervacija);
+        when(mapper.toDto(racun)).thenReturn(racunDto);
+
+        RacunDto rezultat = racunServis.create(racunDto);
+
+        assertEquals(racunDto, rezultat);
+        assertEquals(rezervacija, racun.getRezervacija());
+        verify(em, times(1)).getReference(Rezervacija.class, 1L);
+        verify(repo, times(1)).save(racun);
+    }
+
+    @Test
     void testUpdateStatus() throws Exception {
         when(repo.findById(1L)).thenReturn(racun);
         when(mapper.toDto(racun)).thenReturn(racunDto);
 
         RacunDto rezultat = racunServis.updateStatus(1L, "PLACENO");
 
+        assertEquals(racunDto, rezultat);
         assertEquals("PLACENO", racun.getStatusPlacanja());
         verify(repo, times(1)).save(racun);
     }

@@ -1,11 +1,14 @@
 package com.mycompany.njt_mavenproject.servis;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.springframework.test.util.ReflectionTestUtils;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+
+import jakarta.persistence.EntityManager;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,10 +19,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.mycompany.njt_mavenproject.dto.impl.RezervacijaDto;
+import com.mycompany.njt_mavenproject.dto.impl.StavkaRezervacijeDto;
 import com.mycompany.njt_mavenproject.entity.impl.Rezervacija;
 import com.mycompany.njt_mavenproject.entity.impl.Servis;
+import com.mycompany.njt_mavenproject.entity.impl.StavkaRezervacije;
 import com.mycompany.njt_mavenproject.entity.impl.StatusRezervacije;
+import com.mycompany.njt_mavenproject.entity.impl.Usluga;
 import com.mycompany.njt_mavenproject.entity.impl.Vlasnik;
+import com.mycompany.njt_mavenproject.entity.impl.Vozilo;
 import com.mycompany.njt_mavenproject.mapper.impl.RezervacijaMapper;
 import com.mycompany.njt_mavenproject.repository.impl.RezervacijaRepository;
 import com.mycompany.njt_mavenproject.repository.impl.ServisUslugaRepository;
@@ -40,6 +47,9 @@ class RezervacijaServiceTest {
     @Mock
     ServisUslugaRepository cenovnik;
 
+    @Mock
+    EntityManager em;
+
     @InjectMocks
     RezervacijaService rezervacijaService;
 
@@ -56,7 +66,7 @@ class RezervacijaServiceTest {
         rezervacija = new Rezervacija(1L);
         rezervacija.setVlasnik(vlasnik);
         rezervacija.setServis(servis);
-        rezervacija.setDatum(LocalDateTime.of(2025, 6, 2, 10, 0)); // ponedeljak
+        rezervacija.setDatum(LocalDateTime.of(2025, 6, 2, 10, 0));
         rezervacija.setStatus(StatusRezervacije.CREATED);
         rezervacija.setTrajanjeMin(60);
 
@@ -64,6 +74,7 @@ class RezervacijaServiceTest {
         rezervacijaDto.setId(1L);
         rezervacijaDto.setDatum(LocalDateTime.of(2025, 6, 2, 10, 0));
         rezervacijaDto.setStatus(StatusRezervacije.CREATED);
+        ReflectionTestUtils.setField(rezervacijaService, "em", em);
     }
 
     @AfterEach
@@ -154,12 +165,102 @@ class RezervacijaServiceTest {
     }
 
     @Test
+    void testCreateUspesno() throws Exception {
+        Servis servis = new Servis(1L);
+        Vozilo vozilo = new Vozilo(1L);
+        Usluga usluga = new Usluga(1L, "Zamena ulja", 60, "min");
+
+        StavkaRezervacijeDto stavkaDto = new StavkaRezervacijeDto();
+        stavkaDto.setUslugaId(1L);
+
+        rezervacijaDto.setServisId(1L);
+        rezervacijaDto.setVoziloId(1L);
+        rezervacijaDto.setStavke(Arrays.asList(stavkaDto));
+
+        StavkaRezervacije stavka = new StavkaRezervacije();
+        stavka.setKolicina(1);
+
+        Rezervacija novaRezervacija = new Rezervacija();
+        novaRezervacija.setStavke(Arrays.asList(stavka));
+
+        when(vlasnici.findByUsername("marko123")).thenReturn(vlasnik);
+        when(mapper.toEntity(rezervacijaDto)).thenReturn(novaRezervacija);
+        when(em.getReference(Servis.class, 1L)).thenReturn(servis);
+        when(em.getReference(Vozilo.class, 1L)).thenReturn(vozilo);
+        when(em.find(Usluga.class, 1L)).thenReturn(usluga);
+        when(cenovnik.findCena(1L, 1L)).thenReturn(1500.0);
+        when(repo.existsOverlap(anyLong(), any(), any())).thenReturn(false);
+        when(mapper.toDto(novaRezervacija)).thenReturn(rezervacijaDto);
+
+        RezervacijaDto rezultat = rezervacijaService.create(rezervacijaDto, "marko123");
+
+        assertEquals(rezervacijaDto, rezultat);
+        assertEquals(vlasnik, novaRezervacija.getVlasnik());
+        assertEquals(servis, novaRezervacija.getServis());
+        assertEquals(vozilo, novaRezervacija.getVozilo());
+        assertEquals(StatusRezervacije.CREATED, novaRezervacija.getStatus());
+        assertEquals(1500.0, novaRezervacija.getUkupanIznos());
+        verify(repo, times(1)).save(novaRezervacija);
+    }
+
+    @Test
+    void testCreateDatumNull() {
+        rezervacijaDto.setDatum(null);
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            rezervacijaService.create(rezervacijaDto, "marko123");
+        });
+    }
+
+    @Test
+    void testCreateNepoznatKorisnik() {
+        when(vlasnici.findByUsername("nepostoji")).thenReturn(null);
+
+        assertThrows(Exception.class, () -> {
+            rezervacijaService.create(rezervacijaDto, "nepostoji");
+        });
+    }
+
+    @Test
+    void testCreateTerminZauzet() throws Exception {
+        Servis servis = new Servis(1L);
+        Vozilo vozilo = new Vozilo(1L);
+        Usluga usluga = new Usluga(1L, "Zamena ulja", 60, "min");
+
+        StavkaRezervacijeDto stavkaDto = new StavkaRezervacijeDto();
+        stavkaDto.setUslugaId(1L);
+
+        rezervacijaDto.setServisId(1L);
+        rezervacijaDto.setVoziloId(1L);
+        rezervacijaDto.setStavke(Arrays.asList(stavkaDto));
+
+        StavkaRezervacije stavka = new StavkaRezervacije();
+        stavka.setKolicina(1);
+
+        Rezervacija novaRezervacija = new Rezervacija();
+        novaRezervacija.setStavke(Arrays.asList(stavka));
+
+        when(vlasnici.findByUsername("marko123")).thenReturn(vlasnik);
+        when(mapper.toEntity(rezervacijaDto)).thenReturn(novaRezervacija);
+        when(em.getReference(Servis.class, 1L)).thenReturn(servis);
+        when(em.getReference(Vozilo.class, 1L)).thenReturn(vozilo);
+        when(em.find(Usluga.class, 1L)).thenReturn(usluga);
+        when(cenovnik.findCena(1L, 1L)).thenReturn(1500.0);
+        when(repo.existsOverlap(anyLong(), any(), any())).thenReturn(true);
+
+        assertThrows(IllegalStateException.class, () -> {
+            rezervacijaService.create(rezervacijaDto, "marko123");
+        });
+    }
+
+    @Test
     void testUpdateStatus() throws Exception {
         when(repo.findById(1L)).thenReturn(rezervacija);
         when(mapper.toDto(rezervacija)).thenReturn(rezervacijaDto);
 
         RezervacijaDto rezultat = rezervacijaService.updateStatus(1L, StatusRezervacije.CONFIRMED);
 
+        assertEquals(rezervacijaDto, rezultat);
         assertEquals(StatusRezervacije.CONFIRMED, rezervacija.getStatus());
         verify(repo, times(1)).save(rezervacija);
     }

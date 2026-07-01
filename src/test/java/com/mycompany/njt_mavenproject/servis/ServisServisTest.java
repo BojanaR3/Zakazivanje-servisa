@@ -110,12 +110,17 @@ class ServisServisTest {
 
     @Test
     void testUpdate() throws Exception {
+        ServisDto noviDto = new ServisDto(1L, "Novi servis", "Nova adresa", "022222222");
+
         when(repo.findById(1L)).thenReturn(servis);
-        when(mapper.toDto(servis)).thenReturn(servisDto);
+        when(mapper.toDto(servis)).thenReturn(noviDto);
 
-        ServisDto rezultat = servisServis.update(servisDto);
+        ServisDto rezultat = servisServis.update(noviDto);
 
-        assertEquals(servisDto, rezultat);
+        assertEquals(noviDto, rezultat);
+        assertEquals("Novi servis", servis.getNaziv());
+        assertEquals("Nova adresa", servis.getAdresa());
+        assertEquals("022222222", servis.getTelefon());
         verify(repo, times(1)).save(servis);
     }
 

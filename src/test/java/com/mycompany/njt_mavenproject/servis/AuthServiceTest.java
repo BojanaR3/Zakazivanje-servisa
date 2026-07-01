@@ -113,6 +113,7 @@ class AuthServiceTest {
         assertNotNull(rezultat);
         assertEquals(vlasnikDto, rezultat);
         verify(users, times(1)).save(any(Vlasnik.class));
+        verify(tokens, times(1)).save(any());
         verify(mail, times(1)).send(anyString(), anyString(), anyString());
     }
 

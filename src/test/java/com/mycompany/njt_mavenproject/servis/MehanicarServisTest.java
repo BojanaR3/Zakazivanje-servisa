@@ -1,10 +1,13 @@
 package com.mycompany.njt_mavenproject.servis;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.springframework.test.util.ReflectionTestUtils;
 import static org.mockito.Mockito.*;
 
 import java.util.Arrays;
 import java.util.List;
+
+import jakarta.persistence.EntityManager;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.mycompany.njt_mavenproject.dto.impl.MehanicarDto;
 import com.mycompany.njt_mavenproject.entity.impl.Mehanicar;
+import com.mycompany.njt_mavenproject.entity.impl.Servis;
 import com.mycompany.njt_mavenproject.mapper.impl.MehanicarMapper;
 import com.mycompany.njt_mavenproject.repository.impl.MehanicarRepository;
 
@@ -27,6 +31,9 @@ class MehanicarServisTest {
 
     @Mock
     MehanicarMapper mapper;
+
+    @Mock
+    EntityManager em;
 
     @InjectMocks
     MehanicarServis mehanicarServis;
@@ -48,6 +55,7 @@ class MehanicarServisTest {
         mehanicarDto.setPrezime("Markovic");
         mehanicarDto.setSpecijalnost("Elektrika");
         mehanicarDto.setTelefon("0601234567");
+        ReflectionTestUtils.setField(mehanicarServis, "em", em);
     }
 
     @AfterEach
@@ -136,6 +144,23 @@ class MehanicarServisTest {
     }
 
     @Test
+    void testCreateSaServisId() {
+        Servis servis = new Servis(1L);
+        mehanicarDto.setServisId(1L);
+
+        when(mapper.toEntity(mehanicarDto)).thenReturn(mehanicar);
+        when(em.getReference(Servis.class, 1L)).thenReturn(servis);
+        when(mapper.toDto(mehanicar)).thenReturn(mehanicarDto);
+
+        MehanicarDto rezultat = mehanicarServis.create(mehanicarDto);
+
+        assertEquals(mehanicarDto, rezultat);
+        assertEquals(servis, mehanicar.getServis());
+        verify(em, times(1)).getReference(Servis.class, 1L);
+        verify(repo, times(1)).save(mehanicar);
+    }
+
+    @Test
     void testUpdate() throws Exception {
         when(repo.findById(1L)).thenReturn(mehanicar);
         when(mapper.toDto(mehanicar)).thenReturn(mehanicarDto);
@@ -143,6 +168,23 @@ class MehanicarServisTest {
         MehanicarDto rezultat = mehanicarServis.update(mehanicarDto);
 
         assertEquals(mehanicarDto, rezultat);
+        verify(repo, times(1)).save(mehanicar);
+    }
+
+    @Test
+    void testUpdateSaServisId() throws Exception {
+        Servis servis = new Servis(1L);
+        mehanicarDto.setServisId(1L);
+
+        when(repo.findById(1L)).thenReturn(mehanicar);
+        when(em.getReference(Servis.class, 1L)).thenReturn(servis);
+        when(mapper.toDto(mehanicar)).thenReturn(mehanicarDto);
+
+        MehanicarDto rezultat = mehanicarServis.update(mehanicarDto);
+
+        assertEquals(mehanicarDto, rezultat);
+        assertEquals(servis, mehanicar.getServis());
+        verify(em, times(1)).getReference(Servis.class, 1L);
         verify(repo, times(1)).save(mehanicar);
     }
 

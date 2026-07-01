@@ -110,12 +110,17 @@ class UslugaServisTest {
 
     @Test
     void testUpdate() throws Exception {
+        UslugaDto noviDto = new UslugaDto(1L, "Zamena filtera", 45, "min");
+
         when(usluge.findById(1L)).thenReturn(usluga);
-        when(mapper.toDto(usluga)).thenReturn(uslugaDto);
+        when(mapper.toDto(usluga)).thenReturn(noviDto);
 
-        UslugaDto rezultat = uslugaServis.update(uslugaDto);
+        UslugaDto rezultat = uslugaServis.update(noviDto);
 
-        assertEquals(uslugaDto, rezultat);
+        assertEquals(noviDto, rezultat);
+        assertEquals("Zamena filtera", usluga.getNaziv());
+        assertEquals(45, usluga.getTrajanje());
+        assertEquals("min", usluga.getJedinicaMere());
         verify(usluge, times(1)).save(usluga);
     }
 
