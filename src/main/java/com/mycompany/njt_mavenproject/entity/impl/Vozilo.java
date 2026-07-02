@@ -1,7 +1,6 @@
 package com.mycompany.njt_mavenproject.entity.impl;
 
 import com.mycompany.njt_mavenproject.entity.MyEntity;
-import jakarta.persistence.Entity;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +13,7 @@ import java.util.List;
  * @author Bojana
  */
 @Entity
-@Table(name="vozilo")
+@Table(name = "vozilo")
 public class Vozilo implements MyEntity {
 
     /** Jedinstveni identifikator vozila. */
@@ -31,25 +30,25 @@ public class Vozilo implements MyEntity {
     /** Registarska oznaka vozila. Ne sme biti null ili prazna, između 2 i 20 karaktera. */
     private String registracija;
 
-    /** Kilometraža vozila. Ne sme biti negativna. */
+    /** Kilometraža vozila. Može biti null, ali ako je uneta ne sme biti negativna. */
     private Double kilometraza;
 
     /** Jedinica kilometraže (km ili mi). Ne sme biti null ili prazna. */
     private String jedinicaKilometraze;
 
-    /** Godina proizvodnje vozila. Mora biti između 1900 i 2100. */
+    /** Godina proizvodnje vozila. Ne sme biti null i mora biti između 1900 i 2100. */
     private Integer godProizvodnje;
 
     /** Tip goriva koje vozilo koristi. Ne sme biti null ili prazan. */
     private String tipGoriva;
 
-    /** Vlasnik vozila. */
+    /** Vlasnik vozila. Može biti null. */
     @ManyToOne(optional = true)
-    @JoinColumn(name="vlasnik_id", nullable = true)
+    @JoinColumn(name = "vlasnik_id", nullable = true)
     private Vlasnik vlasnik;
 
-    /** Lista rezervacija povezanih sa vozilom. */
-    @OneToMany(mappedBy="vozilo")
+    /** Lista rezervacija povezanih sa vozilom. Ne sme biti null. */
+    @OneToMany(mappedBy = "vozilo")
     private List<Rezervacija> rezervacije = new ArrayList<>();
 
     /**
@@ -69,18 +68,20 @@ public class Vozilo implements MyEntity {
      * @param godProizvodnje      godina proizvodnje vozila
      * @param tipGoriva           tip goriva
      * @param vlasnik             vlasnik vozila
+     * @throws IllegalArgumentException ako su marka, model, registracija, kilometraža,
+     *                                  jedinica kilometraže, godina proizvodnje ili tip goriva neispravni
      */
     public Vozilo(Long id, String marka, String model, String registracija, Double kilometraza,
                   String jedinicaKilometraze, Integer godProizvodnje, String tipGoriva, Vlasnik vlasnik) {
         this.id = id;
-        this.marka = marka;
-        this.model = model;
-        this.registracija = registracija;
-        this.kilometraza = kilometraza;
-        this.jedinicaKilometraze = jedinicaKilometraze;
-        this.godProizvodnje = godProizvodnje;
-        this.tipGoriva = tipGoriva;
-        this.vlasnik = vlasnik;
+        setMarka(marka);
+        setModel(model);
+        setRegistracija(registracija);
+        setKilometraza(kilometraza);
+        setJedinicaKilometraze(jedinicaKilometraze);
+        setGodProizvodnje(godProizvodnje);
+        setTipGoriva(tipGoriva);
+        setVlasnik(vlasnik);
     }
 
     /**
@@ -88,28 +89,36 @@ public class Vozilo implements MyEntity {
      *
      * @param id identifikator vozila
      */
-    public Vozilo(Long id) { this.id = id; }
+    public Vozilo(Long id) {
+        this.id = id;
+    }
 
     /**
      * Vraća identifikator vozila.
      *
      * @return identifikator vozila
      */
-    public Long getId() { return id; }
+    public Long getId() {
+        return id;
+    }
 
     /**
      * Postavlja identifikator vozila.
      *
      * @param id identifikator vozila
      */
-    public void setId(Long id) { this.id = id; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     /**
      * Vraća marku vozila.
      *
      * @return marka vozila
      */
-    public String getMarka() { return marka; }
+    public String getMarka() {
+        return marka;
+    }
 
     /**
      * Postavlja marku vozila.
@@ -119,10 +128,12 @@ public class Vozilo implements MyEntity {
      * @throws IllegalArgumentException ako je marka null, prazna ili nije između 2 i 50 karaktera
      */
     public void setMarka(String marka) {
-        if (marka == null || marka.isBlank())
+        if (marka == null || marka.isBlank()) {
             throw new IllegalArgumentException("Marka vozila ne sme biti null ili prazna.");
-        if (marka.length() < 2 || marka.length() > 50)
+        }
+        if (marka.length() < 2 || marka.length() > 50) {
             throw new IllegalArgumentException("Marka vozila mora biti između 2 i 50 karaktera.");
+        }
         this.marka = marka;
     }
 
@@ -131,7 +142,9 @@ public class Vozilo implements MyEntity {
      *
      * @return model vozila
      */
-    public String getModel() { return model; }
+    public String getModel() {
+        return model;
+    }
 
     /**
      * Postavlja model vozila.
@@ -141,10 +154,12 @@ public class Vozilo implements MyEntity {
      * @throws IllegalArgumentException ako je model null, prazan ili nije između 1 i 50 karaktera
      */
     public void setModel(String model) {
-        if (model == null || model.isBlank())
+        if (model == null || model.isBlank()) {
             throw new IllegalArgumentException("Model vozila ne sme biti null ili prazan.");
-        if (model.length() < 1 || model.length() > 50)
+        }
+        if (model.length() < 1 || model.length() > 50) {
             throw new IllegalArgumentException("Model vozila mora biti između 1 i 50 karaktera.");
+        }
         this.model = model;
     }
 
@@ -153,7 +168,9 @@ public class Vozilo implements MyEntity {
      *
      * @return registarska oznaka vozila
      */
-    public String getRegistracija() { return registracija; }
+    public String getRegistracija() {
+        return registracija;
+    }
 
     /**
      * Postavlja registarsku oznaku vozila.
@@ -163,10 +180,12 @@ public class Vozilo implements MyEntity {
      * @throws IllegalArgumentException ako je registracija null, prazna ili nije između 2 i 20 karaktera
      */
     public void setRegistracija(String registracija) {
-        if (registracija == null || registracija.isBlank())
+        if (registracija == null || registracija.isBlank()) {
             throw new IllegalArgumentException("Registracija ne sme biti null ili prazna.");
-        if (registracija.length() < 2 || registracija.length() > 20)
+        }
+        if (registracija.length() < 2 || registracija.length() > 20) {
             throw new IllegalArgumentException("Registracija mora biti između 2 i 20 karaktera.");
+        }
         this.registracija = registracija;
     }
 
@@ -175,18 +194,21 @@ public class Vozilo implements MyEntity {
      *
      * @return kilometraža vozila
      */
-    public Double getKilometraza() { return kilometraza; }
+    public Double getKilometraza() {
+        return kilometraza;
+    }
 
     /**
      * Postavlja kilometražu vozila.
-     * Kilometraža ne sme biti negativna.
+     * Kilometraža može biti null, ali ako je uneta ne sme biti negativna.
      *
      * @param kilometraza kilometraža vozila
      * @throws IllegalArgumentException ako je kilometraža negativna
      */
     public void setKilometraza(Double kilometraza) {
-        if (kilometraza != null && kilometraza < 0)
+        if (kilometraza != null && kilometraza < 0) {
             throw new IllegalArgumentException("Kilometraža ne sme biti negativna.");
+        }
         this.kilometraza = kilometraza;
     }
 
@@ -195,7 +217,9 @@ public class Vozilo implements MyEntity {
      *
      * @return jedinica kilometraže
      */
-    public String getJedinicaKilometraze() { return jedinicaKilometraze; }
+    public String getJedinicaKilometraze() {
+        return jedinicaKilometraze;
+    }
 
     /**
      * Postavlja jedinicu kilometraže.
@@ -205,10 +229,12 @@ public class Vozilo implements MyEntity {
      * @throws IllegalArgumentException ako je vrednost null, prazna ili nije "km" ili "mi"
      */
     public void setJedinicaKilometraze(String jedinicaKilometraze) {
-        if (jedinicaKilometraze == null || jedinicaKilometraze.isBlank())
+        if (jedinicaKilometraze == null || jedinicaKilometraze.isBlank()) {
             throw new IllegalArgumentException("Jedinica kilometraže ne sme biti null ili prazna.");
-        if (!jedinicaKilometraze.equals("km") && !jedinicaKilometraze.equals("mi"))
+        }
+        if (!jedinicaKilometraze.equals("km") && !jedinicaKilometraze.equals("mi")) {
             throw new IllegalArgumentException("Jedinica kilometraže mora biti 'km' ili 'mi'.");
+        }
         this.jedinicaKilometraze = jedinicaKilometraze;
     }
 
@@ -217,18 +243,21 @@ public class Vozilo implements MyEntity {
      *
      * @return godina proizvodnje vozila
      */
-    public Integer getGodProizvodnje() { return godProizvodnje; }
+    public Integer getGodProizvodnje() {
+        return godProizvodnje;
+    }
 
     /**
      * Postavlja godinu proizvodnje vozila.
-     * Godina mora biti između 1900 i 2100.
+     * Godina ne sme biti null i mora biti između 1900 i 2100.
      *
      * @param godProizvodnje godina proizvodnje vozila
-     * @throws IllegalArgumentException ako je godina van opsega 1900-2100
+     * @throws IllegalArgumentException ako je godina null ili van opsega 1900-2100
      */
     public void setGodProizvodnje(Integer godProizvodnje) {
-        if (godProizvodnje != null && (godProizvodnje < 1900 || godProizvodnje > 2100))
+        if (godProizvodnje == null || godProizvodnje < 1900 || godProizvodnje > 2100) {
             throw new IllegalArgumentException("Godina proizvodnje mora biti između 1900 i 2100.");
+        }
         this.godProizvodnje = godProizvodnje;
     }
 
@@ -237,7 +266,9 @@ public class Vozilo implements MyEntity {
      *
      * @return tip goriva
      */
-    public String getTipGoriva() { return tipGoriva; }
+    public String getTipGoriva() {
+        return tipGoriva;
+    }
 
     /**
      * Postavlja tip goriva.
@@ -247,8 +278,9 @@ public class Vozilo implements MyEntity {
      * @throws IllegalArgumentException ako je tip goriva null ili prazan
      */
     public void setTipGoriva(String tipGoriva) {
-        if (tipGoriva == null || tipGoriva.isBlank())
+        if (tipGoriva == null || tipGoriva.isBlank()) {
             throw new IllegalArgumentException("Tip goriva ne sme biti null ili prazan.");
+        }
         this.tipGoriva = tipGoriva;
     }
 
@@ -257,26 +289,40 @@ public class Vozilo implements MyEntity {
      *
      * @return vlasnik vozila
      */
-    public Vlasnik getVlasnik() { return vlasnik; }
+    public Vlasnik getVlasnik() {
+        return vlasnik;
+    }
 
     /**
      * Postavlja vlasnika vozila.
+     * Vlasnik može biti null.
      *
      * @param vlasnik vlasnik vozila
      */
-    public void setVlasnik(Vlasnik vlasnik) { this.vlasnik = vlasnik; }
+    public void setVlasnik(Vlasnik vlasnik) {
+        this.vlasnik = vlasnik;
+    }
 
     /**
      * Vraća listu rezervacija vozila.
      *
      * @return lista rezervacija
      */
-    public List<Rezervacija> getRezervacije() { return rezervacije; }
+    public List<Rezervacija> getRezervacije() {
+        return rezervacije;
+    }
 
     /**
      * Postavlja listu rezervacija vozila.
+     * Lista rezervacija ne sme biti null.
      *
      * @param rezervacije lista rezervacija
+     * @throws IllegalArgumentException ako je lista rezervacija null
      */
-    public void setRezervacije(List<Rezervacija> rezervacije) { this.rezervacije = rezervacije; }
+    public void setRezervacije(List<Rezervacija> rezervacije) {
+        if (rezervacije == null) {
+            throw new IllegalArgumentException("Lista rezervacija ne sme biti null.");
+        }
+        this.rezervacije = rezervacije;
+    }
 }

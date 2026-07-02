@@ -44,12 +44,13 @@ public class Servis implements MyEntity {
      * @param naziv   naziv servisa
      * @param adresa  adresa servisa
      * @param telefon kontakt telefon servisa
+     * @throws IllegalArgumentException ako su naziv ili adresa null, prazni ili ako je adresa duža od 200 karaktera
      */
     public Servis(Long id, String naziv, String adresa, String telefon) {
         this.id = id;
-        this.naziv = naziv;
-        this.adresa = adresa;
-        this.telefon = telefon;
+        setNaziv(naziv);
+        setAdresa(adresa);
+        setTelefon(telefon);
     }
     
     /**

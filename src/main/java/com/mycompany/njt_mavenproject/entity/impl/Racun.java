@@ -95,8 +95,13 @@ public class Racun implements MyEntity {
      * Postavlja datum i vreme izdavanja računa.
      *
      * @param datumIzdavanja datum i vreme izdavanja
+     * @throws IllegalArgumentException ako je datum izdavanja null
      */
-    public void setDatumIzdavanja(LocalDateTime datumIzdavanja) { this.datumIzdavanja = datumIzdavanja; }
+    public void setDatumIzdavanja(LocalDateTime datumIzdavanja) {
+        if (datumIzdavanja == null)
+            throw new IllegalArgumentException("Datum izdavanja ne sme biti null.");
+        this.datumIzdavanja = datumIzdavanja;
+    }
     
     /**
      * Vraća ukupan iznos računa.

@@ -1,7 +1,6 @@
 package com.mycompany.njt_mavenproject.entity.impl;
 
 import com.mycompany.njt_mavenproject.entity.MyEntity;
-import jakarta.persistence.Entity;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,11 +34,11 @@ public class Vlasnik implements MyEntity {
     @Column(nullable = false, length = 50)
     private String prezime;
 
-    /** Email adresa vlasnika, mora biti jedinstvena. Ne sme biti null ili prazna. */
+    /** Email adresa vlasnika, mora biti jedinstvena. Ne sme biti null ili prazna, maksimalno 120 karaktera. */
     @Column(nullable = false, length = 120)
     private String email;
 
-    /** Korisničko ime vlasnika, mora biti jedinstveno. Ne sme biti null ili prazno. */
+    /** Korisničko ime vlasnika, mora biti jedinstveno. Ne sme biti null ili prazno, maksimalno 50 karaktera. */
     @Column(nullable = false, length = 50)
     private String username;
 
@@ -56,11 +55,11 @@ public class Vlasnik implements MyEntity {
     @Column(nullable = false)
     private boolean enabled = false;
 
-    /** Lista vozila u vlasništvu korisnika. */
+    /** Lista vozila u vlasništvu korisnika. Ne sme biti null. */
     @OneToMany(mappedBy = "vlasnik", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Vozilo> vozila = new ArrayList<>();
 
-    /** Lista rezervacija koje je vlasnik kreirao. */
+    /** Lista rezervacija koje je vlasnik kreirao. Ne sme biti null. */
     @OneToMany(mappedBy = "vlasnik")
     private List<Rezervacija> rezervacije = new ArrayList<>();
 
@@ -78,14 +77,15 @@ public class Vlasnik implements MyEntity {
      * @param email    email adresa vlasnika
      * @param username korisničko ime vlasnika
      * @param lozinka  lozinka vlasnika
+     * @throws IllegalArgumentException ako su ime, prezime, email, username ili lozinka neispravni
      */
     public Vlasnik(Long id, String ime, String prezime, String email, String username, String lozinka) {
         this.id = id;
-        this.ime = ime;
-        this.prezime = prezime;
-        this.email = email;
-        this.username = username;
-        this.lozinka = lozinka;
+        setIme(ime);
+        setPrezime(prezime);
+        setEmail(email);
+        setUsername(username);
+        setLozinka(lozinka);
     }
 
     /**
@@ -93,28 +93,36 @@ public class Vlasnik implements MyEntity {
      *
      * @param id jedinstveni identifikator vlasnika
      */
-    public Vlasnik(Long id) { this.id = id; }
+    public Vlasnik(Long id) {
+        this.id = id;
+    }
 
     /**
      * Vraća ID vlasnika.
      *
      * @return jedinstveni identifikator
      */
-    public Long getId() { return id; }
+    public Long getId() {
+        return id;
+    }
 
     /**
      * Postavlja ID vlasnika.
      *
      * @param id jedinstveni identifikator
      */
-    public void setId(Long id) { this.id = id; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     /**
      * Vraća ime vlasnika.
      *
      * @return ime
      */
-    public String getIme() { return ime; }
+    public String getIme() {
+        return ime;
+    }
 
     /**
      * Postavlja ime vlasnika.
@@ -124,10 +132,12 @@ public class Vlasnik implements MyEntity {
      * @throws IllegalArgumentException ako je ime null, prazno ili duže od 50 karaktera
      */
     public void setIme(String ime) {
-        if (ime == null || ime.isBlank())
+        if (ime == null || ime.isBlank()) {
             throw new IllegalArgumentException("Ime ne sme biti null ili prazno.");
-        if (ime.length() > 50)
+        }
+        if (ime.length() > 50) {
             throw new IllegalArgumentException("Ime ne sme biti duže od 50 karaktera.");
+        }
         this.ime = ime;
     }
 
@@ -136,7 +146,9 @@ public class Vlasnik implements MyEntity {
      *
      * @return prezime
      */
-    public String getPrezime() { return prezime; }
+    public String getPrezime() {
+        return prezime;
+    }
 
     /**
      * Postavlja prezime vlasnika.
@@ -146,10 +158,12 @@ public class Vlasnik implements MyEntity {
      * @throws IllegalArgumentException ako je prezime null, prazno ili duže od 50 karaktera
      */
     public void setPrezime(String prezime) {
-        if (prezime == null || prezime.isBlank())
+        if (prezime == null || prezime.isBlank()) {
             throw new IllegalArgumentException("Prezime ne sme biti null ili prazno.");
-        if (prezime.length() > 50)
+        }
+        if (prezime.length() > 50) {
             throw new IllegalArgumentException("Prezime ne sme biti duže od 50 karaktera.");
+        }
         this.prezime = prezime;
     }
 
@@ -158,18 +172,24 @@ public class Vlasnik implements MyEntity {
      *
      * @return email adresa
      */
-    public String getEmail() { return email; }
+    public String getEmail() {
+        return email;
+    }
 
     /**
      * Postavlja email adresu vlasnika.
-     * Email ne sme biti null ili prazan.
+     * Email ne sme biti null ili prazan i ne sme biti duži od 120 karaktera.
      *
      * @param email email adresa vlasnika
-     * @throws IllegalArgumentException ako je email null ili prazan
+     * @throws IllegalArgumentException ako je email null, prazan ili duži od 120 karaktera
      */
     public void setEmail(String email) {
-        if (email == null || email.isBlank())
+        if (email == null || email.isBlank()) {
             throw new IllegalArgumentException("Email ne sme biti null ili prazan.");
+        }
+        if (email.length() > 120) {
+            throw new IllegalArgumentException("Email ne sme biti duži od 120 karaktera.");
+        }
         this.email = email;
     }
 
@@ -178,18 +198,24 @@ public class Vlasnik implements MyEntity {
      *
      * @return korisničko ime
      */
-    public String getUsername() { return username; }
+    public String getUsername() {
+        return username;
+    }
 
     /**
      * Postavlja korisničko ime vlasnika.
-     * Korisničko ime ne sme biti null ili prazno.
+     * Korisničko ime ne sme biti null ili prazno i ne sme biti duže od 50 karaktera.
      *
      * @param username korisničko ime vlasnika
-     * @throws IllegalArgumentException ako je korisničko ime null ili prazno
+     * @throws IllegalArgumentException ako je korisničko ime null, prazno ili duže od 50 karaktera
      */
     public void setUsername(String username) {
-        if (username == null || username.isBlank())
+        if (username == null || username.isBlank()) {
             throw new IllegalArgumentException("Korisničko ime ne sme biti null ili prazno.");
+        }
+        if (username.length() > 50) {
+            throw new IllegalArgumentException("Korisničko ime ne sme biti duže od 50 karaktera.");
+        }
         this.username = username;
     }
 
@@ -198,7 +224,9 @@ public class Vlasnik implements MyEntity {
      *
      * @return lozinka
      */
-    public String getLozinka() { return lozinka; }
+    public String getLozinka() {
+        return lozinka;
+    }
 
     /**
      * Postavlja hešovanu lozinku vlasnika.
@@ -208,8 +236,9 @@ public class Vlasnik implements MyEntity {
      * @throws IllegalArgumentException ako je lozinka null ili prazna
      */
     public void setLozinka(String lozinka) {
-        if (lozinka == null || lozinka.isBlank())
+        if (lozinka == null || lozinka.isBlank()) {
             throw new IllegalArgumentException("Lozinka ne sme biti null ili prazna.");
+        }
         this.lozinka = lozinka;
     }
 
@@ -218,7 +247,9 @@ public class Vlasnik implements MyEntity {
      *
      * @return uloga (VLASNIK ili ADMIN)
      */
-    public Uloga getUloga() { return uloga; }
+    public Uloga getUloga() {
+        return uloga;
+    }
 
     /**
      * Postavlja ulogu korisnika u sistemu.
@@ -228,8 +259,9 @@ public class Vlasnik implements MyEntity {
      * @throws IllegalArgumentException ako je uloga null
      */
     public void setUloga(Uloga uloga) {
-        if (uloga == null)
+        if (uloga == null) {
             throw new IllegalArgumentException("Uloga ne sme biti null.");
+        }
         this.uloga = uloga;
     }
 
@@ -238,40 +270,62 @@ public class Vlasnik implements MyEntity {
      *
      * @return true ako je nalog aktiviran, false ako nije
      */
-    public boolean isEnabled() { return enabled; }
+    public boolean isEnabled() {
+        return enabled;
+    }
 
     /**
      * Postavlja status aktivacije naloga.
      *
      * @param enabled true ako je nalog aktiviran
      */
-    public void setEnabled(boolean enabled) { this.enabled = enabled; }
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 
     /**
      * Vraća listu vozila vlasnika.
      *
      * @return lista vozila
      */
-    public List<Vozilo> getVozila() { return vozila; }
+    public List<Vozilo> getVozila() {
+        return vozila;
+    }
 
     /**
      * Postavlja listu vozila vlasnika.
+     * Lista vozila ne sme biti null.
      *
      * @param vozila lista vozila
+     * @throws IllegalArgumentException ako je lista vozila null
      */
-    public void setVozila(List<Vozilo> vozila) { this.vozila = vozila; }
+    public void setVozila(List<Vozilo> vozila) {
+        if (vozila == null) {
+            throw new IllegalArgumentException("Lista vozila ne sme biti null.");
+        }
+        this.vozila = vozila;
+    }
 
     /**
      * Vraća listu rezervacija vlasnika.
      *
      * @return lista rezervacija
      */
-    public List<Rezervacija> getRezervacije() { return rezervacije; }
+    public List<Rezervacija> getRezervacije() {
+        return rezervacije;
+    }
 
     /**
      * Postavlja listu rezervacija vlasnika.
+     * Lista rezervacija ne sme biti null.
      *
      * @param rezervacije lista rezervacija
+     * @throws IllegalArgumentException ako je lista rezervacija null
      */
-    public void setRezervacije(List<Rezervacija> rezervacije) { this.rezervacije = rezervacije; }
+    public void setRezervacije(List<Rezervacija> rezervacije) {
+        if (rezervacije == null) {
+            throw new IllegalArgumentException("Lista rezervacija ne sme biti null.");
+        }
+        this.rezervacije = rezervacije;
+    }
 }

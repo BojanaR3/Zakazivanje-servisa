@@ -55,6 +55,7 @@ class RacunServisTest {
         racunDto.setBroj("R-001");
         racunDto.setUkupanIznos(1500.0);
         racunDto.setStatusPlacanja("NEPLACENO");
+
         ReflectionTestUtils.setField(racunServis, "em", em);
     }
 
@@ -108,6 +109,7 @@ class RacunServisTest {
         Exception ex = assertThrows(Exception.class, () -> {
             racunServis.findById(99L);
         });
+
         assertEquals("Racun #99 ne postoji.", ex.getMessage());
     }
 
@@ -145,16 +147,19 @@ class RacunServisTest {
 
     @Test
     void testCreateDatumIzdavanjaNull() {
-        racun.setDatumIzdavanja(null);
+        Racun racunBezDatuma = new Racun(1L);
+        racunBezDatuma.setBroj("R-001");
+        racunBezDatuma.setUkupanIznos(1500.0);
+        racunBezDatuma.setStatusPlacanja("NEPLACENO");
 
-        when(mapper.toEntity(racunDto)).thenReturn(racun);
-        when(mapper.toDto(racun)).thenReturn(racunDto);
+        when(mapper.toEntity(racunDto)).thenReturn(racunBezDatuma);
+        when(mapper.toDto(racunBezDatuma)).thenReturn(racunDto);
 
         RacunDto rezultat = racunServis.create(racunDto);
 
         assertEquals(racunDto, rezultat);
-        assertNotNull(racun.getDatumIzdavanja());
-        verify(repo, times(1)).save(racun);
+        assertNotNull(racunBezDatuma.getDatumIzdavanja());
+        verify(repo, times(1)).save(racunBezDatuma);
     }
 
     @Test
@@ -198,6 +203,7 @@ class RacunServisTest {
     @Test
     void testDeleteById() {
         racunServis.deleteById(1L);
+
         verify(repo, times(1)).deleteById(1L);
     }
 }

@@ -86,16 +86,17 @@ public class Rezervacija implements MyEntity {
      * @param vlasnik     vlasnik koji je kreirao rezervaciju
      * @param vozilo      vozilo koje se servisira
      * @param servis      servis u kome je rezervisan termin
+     * @throws IllegalArgumentException ako su datum, iznos, status, vlasnik, vozilo ili servis neispravni
      */
     public Rezervacija(Long id, LocalDateTime datum, Double ukupanIznos, StatusRezervacije status,
-                       Vlasnik vlasnik, Vozilo vozilo, Servis servis) {
-        this.id = id;
-        this.datum = datum;
-        this.ukupanIznos = ukupanIznos;
-        this.status = status;
-        this.vlasnik = vlasnik;
-        this.vozilo = vozilo;
-        this.servis = servis;
+            Vlasnik vlasnik, Vozilo vozilo, Servis servis) {
+		this.id = id;
+		setDatum(datum);
+		setUkupanIznos(ukupanIznos);
+		setStatus(status);
+		setVlasnik(vlasnik);
+		setVozilo(vozilo);
+		setServis(servis);
     }
 
     /**
@@ -113,8 +114,11 @@ public class Rezervacija implements MyEntity {
      * Dodaje stavku u rezervaciju i ažurira ukupan iznos.
      *
      * @param item stavka rezervacije koja se dodaje
+     * @throws IllegalArgumentException ako je stavka null
      */
     public void addItem(StavkaRezervacije item) {
+        if (item == null)
+            throw new IllegalArgumentException("Stavka rezervacije ne sme biti null.");
         item.setRezervacija(this);
         this.stavke.add(item);
         recalcTotal();
@@ -124,9 +128,12 @@ public class Rezervacija implements MyEntity {
      * Uklanja stavku iz rezervacije i ažurira ukupan iznos.
      *
      * @param item stavka rezervacije koja se uklanja
+     * @throws IllegalArgumentException ako je stavka null
      */
     public void removeItem(StavkaRezervacije item) {
-        item.setRezervacija(null);
+        if (item == null) {
+            throw new IllegalArgumentException("Stavka rezervacije ne sme biti null.");
+        }
         this.stavke.remove(item);
         recalcTotal();
     }
@@ -286,10 +293,17 @@ public class Rezervacija implements MyEntity {
 
     /**
      * Postavlja listu stavki rezervacije.
+     * Lista stavki ne sme biti null.
      *
      * @param stavke lista stavki rezervacije
+     * @throws IllegalArgumentException ako je lista null
      */
-    public void setStavke(List<StavkaRezervacije> stavke) { this.stavke = stavke; }
+    public void setStavke(List<StavkaRezervacije> stavke) {
+        if (stavke == null)
+            throw new IllegalArgumentException("Lista stavki ne sme biti null.");
+        this.stavke = stavke;
+        recalcTotal();
+    }
 
     /**
      * Vraća ukupno trajanje rezervacije u minutima.
@@ -300,14 +314,14 @@ public class Rezervacija implements MyEntity {
 
     /**
      * Postavlja ukupno trajanje rezervacije u minutima.
-     * Trajanje ne sme biti negativno.
+     * Trajanje ne sme biti null ili negativno.
      *
      * @param trajanjeMin trajanje u minutima
-     * @throws IllegalArgumentException ako je trajanje negativno
+     * @throws IllegalArgumentException ako je trajanje null ili negativno
      */
     public void setTrajanjeMin(Integer trajanjeMin) {
-        if (trajanjeMin != null && trajanjeMin < 0)
-            throw new IllegalArgumentException("Trajanje ne sme biti negativno.");
+        if (trajanjeMin == null || trajanjeMin < 0)
+            throw new IllegalArgumentException("Trajanje ne sme biti null ili negativno.");
         this.trajanjeMin = trajanjeMin;
     }
 }

@@ -53,7 +53,6 @@ class RezervacijaTest {
 
     @Test
     void testPrePersistDatumNull() {
-        r.setDatum(null);
         r.prePersist();
         assertNotNull(r.getDatum());
     }
@@ -65,13 +64,6 @@ class RezervacijaTest {
         r.prePersist();
         assertEquals(datum, r.getDatum());
     }
-    
-    @Test
-    void testPrePersistTrajanjeMinNull() {
-        r.setTrajanjeMin(null);
-        r.prePersist();
-        assertEquals(0, r.getTrajanjeMin());
-    }
 
     @Test
     void testAddItem() {
@@ -82,6 +74,11 @@ class RezervacijaTest {
         assertEquals(1, r.getStavke().size());
         assertEquals(r, stavka.getRezervacija());
         assertEquals(500.0, r.getUkupanIznos());
+    }
+
+    @Test
+    void testAddItemNull() {
+        assertThrows(IllegalArgumentException.class, () -> r.addItem(null));
     }
 
     @Test
@@ -106,8 +103,12 @@ class RezervacijaTest {
         r.addItem(stavka);
         r.removeItem(stavka);
         assertEquals(0, r.getStavke().size());
-        assertNull(stavka.getRezervacija());
         assertEquals(0.0, r.getUkupanIznos());
+    }
+    
+    @Test
+    void testRemoveItemNull() {
+        assertThrows(IllegalArgumentException.class, () -> r.removeItem(null));
     }
 
     @Test
@@ -144,15 +145,41 @@ class RezervacijaTest {
     }
 
     @Test
+    void testSetDatumNull() {
+        assertThrows(IllegalArgumentException.class, () -> r.setDatum(null));
+    }
+
+    @Test
     void testSetUkupanIznos() {
         r.setUkupanIznos(1500.0);
         assertEquals(1500.0, r.getUkupanIznos());
     }
 
     @Test
+    void testSetUkupanIznosNull() {
+        assertThrows(IllegalArgumentException.class, () -> r.setUkupanIznos(null));
+    }
+
+    @Test
+    void testSetUkupanIznosNegativan() {
+        assertThrows(IllegalArgumentException.class, () -> r.setUkupanIznos(-1.0));
+    }
+
+    @Test
+    void testSetUkupanIznosNula() {
+        r.setUkupanIznos(0.0);
+        assertEquals(0.0, r.getUkupanIznos());
+    }
+
+    @Test
     void testSetStatus() {
         r.setStatus(StatusRezervacije.CONFIRMED);
         assertEquals(StatusRezervacije.CONFIRMED, r.getStatus());
+    }
+
+    @Test
+    void testSetStatusNull() {
+        assertThrows(IllegalArgumentException.class, () -> r.setStatus(null));
     }
 
     @Test
@@ -163,10 +190,20 @@ class RezervacijaTest {
     }
 
     @Test
+    void testSetVlasnikNull() {
+        assertThrows(IllegalArgumentException.class, () -> r.setVlasnik(null));
+    }
+
+    @Test
     void testSetVozilo() {
         Vozilo v = new Vozilo(1L);
         r.setVozilo(v);
         assertEquals(v, r.getVozilo());
+    }
+
+    @Test
+    void testSetVoziloNull() {
+        assertThrows(IllegalArgumentException.class, () -> r.setVozilo(null));
     }
 
     @Test
@@ -177,11 +214,20 @@ class RezervacijaTest {
     }
 
     @Test
+    void testSetServisNull() {
+        assertThrows(IllegalArgumentException.class, () -> r.setServis(null));
+    }
+
+    @Test
     void testSetStavke() {
         List<StavkaRezervacije> stavke = new ArrayList<>();
-        stavke.add(new StavkaRezervacije());
         r.setStavke(stavke);
         assertEquals(stavke, r.getStavke());
+    }
+
+    @Test
+    void testSetStavkeNull() {
+        assertThrows(IllegalArgumentException.class, () -> r.setStavke(null));
     }
 
     @Test
@@ -189,7 +235,17 @@ class RezervacijaTest {
         r.setTrajanjeMin(60);
         assertEquals(60, r.getTrajanjeMin());
     }
-    
+
+    @Test
+    void testSetTrajanjeMinNull() {
+        assertThrows(IllegalArgumentException.class, () -> r.setTrajanjeMin(null));
+    }
+
+    @Test
+    void testSetTrajanjeMinNegativan() {
+        assertThrows(IllegalArgumentException.class, () -> r.setTrajanjeMin(-1));
+    }
+
     @Test
     void testDefaultVrednosti() {
         assertEquals(StatusRezervacije.CREATED, r.getStatus());
@@ -198,6 +254,4 @@ class RezervacijaTest {
         assertNotNull(r.getStavke());
         assertTrue(r.getStavke().isEmpty());
     }
-    
-    
 }
